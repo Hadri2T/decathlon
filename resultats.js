@@ -1,6 +1,6 @@
-// ==================== RÉSULTATS : DU GOOGLE SHEET AUX CLASSEMENTS ====================
-// Ce fichier lit les résultats dans le Google Sheet, calcule les classements
-// et les affiche dans les pages Classements. Il relit le Sheet toutes les 30 secondes.
+// ==================== RÉSULTATS : DU GOOGLE SHEET AUX PAGES DU SITE ====================
+// Ce fichier lit les données du Google Sheet, puis remplit les pages Classements,
+// Participants et Profil. Il relit le Sheet toutes les 30 secondes.
 
 
 // ---------- 1. RÉGLAGES ----------
@@ -100,17 +100,23 @@ function formaterDistance(metres) {
   return metres.toFixed(2).replace(".", ",") + " m";
 }
 
-// Évite qu'un texte du Sheet contenant < ou > soit pris pour du code et casse la page
+// 1 → "1er" (ou "1re" au féminin), 2 → "2e", …
+function ordinal(nombre, feminin) {
+  if (nombre === 1) return feminin ? "1re" : "1er";
+  return nombre + "e";
+}
+
+// Évite qu'un texte du Sheet contenant < > " soit pris pour du code et casse la page
 function echapper(texte) {
-  return String(texte).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return String(texte)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 
-// ---------- 4. CALCUL DES CLASSEMENTS ----------
-// Chaque épreuve est transformée en une liste de lignes de la forme :
-//   { nom: "Camille Martin", initiales: "CM", genre: "F", detail: "Série 1", perf: 14.72 }
-// ⚠️ Règles provisoires : simple tri par performance, en attendant les règles
-//    des organisateurs (ex. 100 m : vainqueurs de série d'abord ?).
+// ---------- 4. PARTICIPANTS ET PHOTOS ----------
 
 // Retrouve un participant à partir de son numéro de dossard
 function trouverParticipant(dossard) {
@@ -123,19 +129,49 @@ function nomDuDossard(dossard) {
   return participant ? participant["prénom"] + " " + participant.nom : "Dossard " + dossard;
 }
 
-// "CM" pour Camille Martin : affiché dans le rond, en attendant les photos
-function initialesDuDossard(dossard) {
-  const participant = trouverParticipant(dossard);
-  return participant ? participant["prénom"].charAt(0) + participant.nom.charAt(0) : "?";
+// Transforme le lien Google Drive collé dans le Sheet
+// (ex. https://drive.google.com/file/d/1AbC…/view?usp=sharing)
+// en adresse d'image affichable. Renvoie "" s'il n'y a pas de photo.
+function adressePhoto(lien) {
+  lien = (lien || "").trim();
+  // On récupère l'identifiant du fichier : ce qui suit « /d/ » ou « id= »
+  const trouve = lien.match(/\/d\/([\w-]+)/) || lien.match(/[?&]id=([\w-]+)/);
+  if (trouve) {
+    // Adresse directe de l'image chez Google (le navigateur la garde en mémoire 24 h)
+    return "https://lh3.googleusercontent.com/d/" + trouve[1] + "=w400";
+  }
+  // Autre adresse d'image (https://…) : utilisée telle quelle
+  return lien.startsWith("http") ? lien : "";
 }
+
+// Rond de l'athlète : ses initiales, recouvertes par sa photo quand elle existe.
+// Si la photo ne se charge pas (lien faux, dossier non partagé, réseau…), l'image est
+// cachée (onerror) et les initiales réapparaissent. Le site la réessaie toutes les 30 s.
+// taille : "" (classements), "grand" (grille) ou "tres-grand" (profil)
+function rondAthlete(dossard, taille = "") {
+  const participant = trouverParticipant(dossard);
+  if (!participant) return `<span class="avatar ${taille}">?</span>`;
+
+  const initiales = participant["prénom"].charAt(0) + participant.nom.charAt(0);
+  const photo = adressePhoto(participant.photo);
+  const image = photo ? `<img src="${echapper(photo)}" alt="" onerror="this.hidden = true">` : "";
+  return `<span class="avatar ${taille}">${echapper(initiales)}${image}</span>`;
+}
+
+
+// ---------- 5. CALCUL DES CLASSEMENTS ----------
+// Chaque épreuve est transformée en une liste de lignes de la forme :
+//   { dossard: "1", nom: "Camille Martin", genre: "F", detail: "Série 1", perf: 14.72 }
+// ⚠️ Règles provisoires : simple tri par performance, en attendant les règles
+//    des organisateurs (ex. 100 m : vainqueurs de série d'abord ?).
 
 // Courses (100 m, 800 m) : la performance est le temps
 function lignesCourse(onglet) {
   return donnees[onglet].map(function (ligne) {
     const participant = trouverParticipant(ligne.dossard);
     return {
+      dossard: ligne.dossard,
       nom: nomDuDossard(ligne.dossard),
-      initiales: initialesDuDossard(ligne.dossard),
       genre: participant ? participant.genre : "",
       detail: ligne["série"] ? "Série " + ligne["série"] : "",
       perf: enNombre(ligne.temps),
@@ -150,8 +186,8 @@ function lignesConcours(onglet) {
     const essais = [ligne["essai 1"], ligne["essai 2"], ligne["essai 3"]];
     const distances = essais.map(enNombre).filter(d => d !== null);   // enlève les X et les cases vides
     return {
+      dossard: ligne.dossard,
       nom: nomDuDossard(ligne.dossard),
-      initiales: initialesDuDossard(ligne.dossard),
       genre: participant ? participant.genre : "",
       detail: essais.map(e => e || "–").join(" · "),                   // ex. « 3,60 · X · 3,55 »
       perf: distances.length > 0 ? Math.max(...distances) : null,
@@ -162,16 +198,25 @@ function lignesConcours(onglet) {
 // Relais : une ligne par équipe, la performance est le temps de l'équipe
 function lignesRelais() {
   return donnees.relais.map(function (equipe) {
-    const coureurs = [equipe["coureur 1"], equipe["coureur 2"], equipe["coureur 3"], equipe["coureur 4"]];
+    const coureurs = [equipe["coureur 1"], equipe["coureur 2"], equipe["coureur 3"], equipe["coureur 4"]]
+      .filter(d => d !== "");
     return {
       nom: "Équipe " + equipe["équipe"],
-      initiales: "",   // pas de rond pour une équipe
+      coureurs: coureurs,   // dossards des 4 coureurs (sert au profil)
       genre: "",
-      detail: coureurs.filter(d => d !== "").map(nomDuDossard).join(" · "),
+      detail: coureurs.map(nomDuDossard).join(" · "),
       perf: enNombre(equipe.temps),
     };
   });
 }
+
+// Les 4 épreuves individuelles (utilisées par les pages Classements et Profil)
+const EPREUVES = [
+  { onglet: "100m",     titre: "100 m",            lignes: () => lignesCourse("100m"),       plusPetitGagne: true,  formater: formaterTemps },
+  { onglet: "800m",     titre: "800 m",            lignes: () => lignesCourse("800m"),       plusPetitGagne: true,  formater: formaterTemps },
+  { onglet: "longueur", titre: "Saut en longueur", lignes: () => lignesConcours("longueur"), plusPetitGagne: false, formater: formaterDistance },
+  { onglet: "poids",    titre: "Lancer de poids",  lignes: () => lignesConcours("poids"),    plusPetitGagne: false, formater: formaterDistance },
+];
 
 // Trie les lignes et leur attribue un rang.
 // plusPetitGagne : true pour un temps (le plus petit gagne), false pour une distance.
@@ -194,7 +239,7 @@ function classer(lignes, plusPetitGagne) {
 }
 
 
-// ---------- 5. AFFICHAGE ----------
+// ---------- 6. PAGES CLASSEMENTS ----------
 
 // Colonne Rang : pastille Or / Argent / Bronze pour les 3 premiers, sinon le numéro
 function pastilleRang(rang) {
@@ -222,17 +267,17 @@ function afficherTableau(conteneur, lignes, formater, titreColonne) {
 
   // Une ligne par athlète (ou par équipe)
   lignes.forEach(function (ligne) {
-    // Rond avec les initiales (les photos le remplaceront à l'étape 4)
-    const rond = ligne.initiales ? `<span class="avatar">${echapper(ligne.initiales)}</span>` : "";
+    const contenu = `
+              ${ligne.dossard ? rondAthlete(ligne.dossard) : ""}
+              <div><span class="nom">${echapper(ligne.nom)}</span><span class="detail">${echapper(ligne.detail)}</span></div>`;
+    // Un athlète est cliquable : le lien ouvre son profil
+    const athlete = ligne.dossard
+      ? `<a class="athlete" href="#participant-${encodeURIComponent(ligne.dossard)}">${contenu}</a>`
+      : `<div class="athlete">${contenu}</div>`;
     html += `
         <tr>
           <td class="rang">${pastilleRang(ligne.rang)}</td>
-          <td>
-            <div class="athlete">
-              ${rond}
-              <div>${echapper(ligne.nom)}<span class="detail">${echapper(ligne.detail)}</span></div>
-            </div>
-          </td>
+          <td>${athlete}</td>
           <td class="perf">${ligne.perf !== null ? formater(ligne.perf) : "–"}</td>
         </tr>`;
   });
@@ -261,11 +306,147 @@ function afficherEpreuve(epreuve, lignes, plusPetitGagne, formater, titreColonne
 // Affiche tous les classements (le général attend son barème de points)
 function afficherClassements() {
   if (!donnees) return;   // rien n'est encore chargé
-  afficherEpreuve("100m", lignesCourse("100m"), true, formaterTemps);
-  afficherEpreuve("800m", lignesCourse("800m"), true, formaterTemps);
-  afficherEpreuve("longueur", lignesConcours("longueur"), false, formaterDistance);
-  afficherEpreuve("poids", lignesConcours("poids"), false, formaterDistance);
+  EPREUVES.forEach(function (e) {
+    afficherEpreuve(e.onglet, e.lignes(), e.plusPetitGagne, e.formater);
+  });
   afficherEpreuve("relais", lignesRelais(), true, formaterTemps, "Équipe");
+}
+
+
+// ---------- 7. PAGE PARTICIPANTS : grille de cartes ----------
+
+function afficherParticipants() {
+  const grille = document.getElementById("grille-participants");
+
+  // Tri par prénom, pour retrouver facilement quelqu'un
+  const participants = [...donnees.participants].sort(function (a, b) {
+    return a["prénom"].localeCompare(b["prénom"], "fr");
+  });
+
+  if (participants.length === 0) {
+    grille.innerHTML = '<p class="vide">Pas encore de participants.</p>';
+    return;
+  }
+
+  // Une carte par participant : un clic ouvre son profil
+  grille.innerHTML = participants.map(function (p) {
+    return `
+      <a class="carte-athlete" href="#participant-${encodeURIComponent(p.dossard)}">
+        ${rondAthlete(p.dossard, "grand")}
+        <span class="nom">${echapper(p["prénom"] + " " + p.nom)}</span>
+        <span class="detail">Dossard ${echapper(p.dossard)}</span>
+      </a>`;
+  }).join("");
+}
+
+
+// ---------- 8. PAGE PROFIL D'UN ATHLÈTE (adresse #participant-12) ----------
+
+function afficherProfil() {
+  const adresse = location.hash.slice(1);
+  if (!donnees || !adresse.startsWith("participant-")) return;   // on n'est pas sur un profil
+
+  const conteneur = document.getElementById("contenu-profil");
+  const dossard = decodeURIComponent(adresse.slice("participant-".length));
+  const participant = trouverParticipant(dossard);
+  if (!participant) {
+    conteneur.innerHTML = `<p class="vide">Aucun participant avec le dossard ${echapper(dossard)}.</p>`;
+    return;
+  }
+
+  const feminin = participant.genre === "F";
+  const aUnGenre = participant.genre === "F" || participant.genre === "H";
+
+  // Une ligne par épreuve individuelle : résultat, rang mixte et rang parmi son genre
+  let lignesHtml = "";
+  EPREUVES.forEach(function (e) {
+    const lignes = e.lignes();
+
+    // Rang mixte (on le note tout de suite : le classement suivant va le remplacer)
+    const moi = classer(lignes, e.plusPetitGagne).find(l => l.dossard === dossard);
+    const rangMixte = moi ? moi.rang : undefined;
+
+    // Rang parmi les femmes ou parmi les hommes (ex. « 3e femme »)
+    let texteGenre = "";
+    if (aUnGenre) {
+      const memeGenre = classer(lignes.filter(l => l.genre === participant.genre), e.plusPetitGagne);
+      const moiGenre = memeGenre.find(l => l.dossard === dossard);
+      if (moiGenre && moiGenre.rang) {
+        texteGenre = ordinal(moiGenre.rang, feminin) + (feminin ? " femme" : " homme");
+      }
+    }
+
+    lignesHtml += `
+        <tr>
+          <td>${e.titre}<span class="detail">${moi ? echapper(moi.detail) : "Pas inscrit"}</span></td>
+          <td>${pastilleRang(rangMixte)}<span class="detail">${texteGenre}</span></td>
+          <td class="perf">${moi && moi.perf !== null ? e.formater(moi.perf) : "–"}</td>
+        </tr>`;
+  });
+
+  // Relais : l'équipe dans laquelle court l'athlète
+  const equipe = classer(lignesRelais(), true).find(eq => eq.coureurs.includes(dossard));
+  if (equipe) {
+    lignesHtml += `
+        <tr>
+          <td>Relais 4 × 100 m<span class="detail">${echapper(equipe.nom)} : ${echapper(equipe.detail)}</span></td>
+          <td>${pastilleRang(equipe.rang)}</td>
+          <td class="perf">${equipe.perf !== null ? formaterTemps(equipe.perf) : "–"}</td>
+        </tr>`;
+  }
+
+  // Classement général : en attente du barème de points
+  lignesHtml += `
+        <tr>
+          <td>Classement général<span class="detail">Barème de points à venir</span></td>
+          <td>${pastilleRang(undefined)}</td>
+          <td class="perf">–</td>
+        </tr>`;
+
+  conteneur.innerHTML = `
+    <div class="profil-entete">
+      ${rondAthlete(dossard, "tres-grand")}
+      <div>
+        <p class="etiquette">Dossard ${echapper(dossard)}</p>
+        <h2>${echapper(nomDuDossard(dossard))}</h2>
+      </div>
+    </div>
+
+    <p class="etiquette">Résultats</p>
+    <table class="tableau">
+      <thead>
+        <tr><th>Épreuve</th><th>Rang</th><th>Résultat</th></tr>
+      </thead>
+      <tbody>${lignesHtml}
+      </tbody>
+    </table>
+    <p class="maj">Mis à jour à ${heureMaj}</p>`;
+}
+
+// Quand l'adresse change (clic sur un athlète), on affiche son profil
+window.addEventListener("hashchange", afficherProfil);
+
+
+// ---------- 9. FILTRES MIXTE / FEMMES / HOMMES ----------
+
+document.querySelectorAll(".filtres button").forEach(function (bouton) {
+  bouton.addEventListener("click", function () {
+    // On désélectionne les boutons voisins, on sélectionne celui qui a été cliqué…
+    bouton.parentElement.querySelectorAll("button").forEach(b => b.classList.remove("actif"));
+    bouton.classList.add("actif");
+    // … et on réaffiche les classements avec ce filtre
+    afficherClassements();
+  });
+});
+
+
+// ---------- 10. MISE À JOUR AUTOMATIQUE ----------
+
+// Remplit toutes les pages qui dépendent du Sheet
+function afficherTout() {
+  afficherClassements();
+  afficherParticipants();
+  afficherProfil();
 }
 
 // Message affiché si le Sheet n'a jamais pu être lu
@@ -279,27 +460,26 @@ function afficherErreur() {
   });
 }
 
-
-// ---------- 6. FILTRES MIXTE / FEMMES / HOMMES ----------
-
-document.querySelectorAll(".filtres button").forEach(function (bouton) {
-  bouton.addEventListener("click", function () {
-    // On désélectionne les boutons voisins, on sélectionne celui qui a été cliqué…
-    bouton.parentElement.querySelectorAll("button").forEach(b => b.classList.remove("actif"));
-    bouton.classList.add("actif");
-    // … et on réaffiche les classements avec ce filtre
-    afficherClassements();
-  });
-});
-
-
-// ---------- 7. MISE À JOUR AUTOMATIQUE ----------
-
 async function mettreAJour() {
   try {
-    donnees = await chargerDonnees();
+    const nouvelles = await chargerDonnees();
     heureMaj = new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
-    afficherClassements();
+
+    if (JSON.stringify(nouvelles) !== JSON.stringify(donnees)) {
+      // Les données ont changé : on redessine les pages
+      donnees = nouvelles;
+      afficherTout();
+    } else {
+      // Rien de nouveau : on met juste l'heure à jour (évite que les photos clignotent)
+      document.querySelectorAll(".maj").forEach(function (p) {
+        p.textContent = "Mis à jour à " + heureMaj;
+      });
+      // Photos qui n'ont pas pu se charger : on les réessaie
+      document.querySelectorAll(".avatar img[hidden]").forEach(function (img) {
+        img.hidden = false;
+        img.src = img.src;
+      });
+    }
   } catch (erreur) {
     console.error(erreur);
     // Si des résultats sont déjà affichés, on les garde ; sinon on prévient

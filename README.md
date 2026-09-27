@@ -25,9 +25,11 @@ Le site est consultable sur téléphone pendant toute la journée, sans compte n
 - **Accueil** : date, lieu, infos pratiques et programme de la journée.
 - **Épreuves** : horaires, format et consignes de chaque épreuve.
 - **Classements** : un classement par épreuve et un classement général, en version mixte, femmes et hommes, mis à jour au fil de la journée.
-- **Participants** : le profil de chaque athlète, avec sa photo et ses résultats.
+- **Participants** : une carte par athlète avec sa photo. Un clic ouvre son profil : ses résultats
+  et son rang dans chaque épreuve (au classement mixte et parmi les femmes ou les hommes).
+  Dans les classements, un clic sur un athlète ouvre aussi son profil.
 
-Chaque page a sa propre adresse (par exemple `…/#classement-100m`) : on peut envoyer le lien direct d'un classement.
+Chaque page a sa propre adresse (par exemple `…/#classement-100m`, ou `…/#participant-12` pour un profil) : on peut envoyer le lien direct d'un classement ou d'un athlète.
 
 Les équipes du relais sont composées automatiquement à partir des résultats des courses,
 pour obtenir des équipes de niveau homogène.
@@ -38,7 +40,7 @@ pour obtenir des équipes de niveau homogène.
 - Les résultats sont saisis par les organisateurs dans un Google Sheet.
 - Le site lit ce Google Sheet et calcule les classements automatiquement : pas de serveur, pas de login.
 - Les classements se mettent à jour tout seuls toutes les 30 secondes.
-- Les photos des participants sont hébergées sur Google Drive, jamais dans ce dépôt.
+- Les photos des participants sont hébergées sur Google Drive, jamais dans ce dépôt : le lien de chaque photo est collé dans le Google Sheet. Sans photo, le site affiche les initiales.
 
 ## Voir le site
 
@@ -75,4 +77,4 @@ Le site est conçu d'abord pour le téléphone. Pour le voir comme sur un mobile
 | `index.html` | Contenu du site : en-tête, menu et toutes les pages |
 | `style.css` | Apparence : menu téléphone et ordinateur, mise en page |
 | `app.js` | Navigation entre les pages, ouverture du menu |
-| `resultats.js` | Lecture du Google Sheet, calcul et affichage des classements, filtres Mixte / Femmes / Hommes |
+| `resultats.js` | Lecture du Google Sheet, classements, filtres Mixte / Femmes / Hommes, grille des participants et profils |

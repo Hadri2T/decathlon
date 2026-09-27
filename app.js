@@ -9,6 +9,12 @@ function afficherPage() {
   // Id de la page demandée : ce qui suit le # dans l'adresse (« accueil » s'il n'y a rien)
   let id = location.hash.slice(1) || "accueil";
 
+  // Profil d'un athlète : l'adresse est de la forme #participant-12 (12 = son dossard).
+  // C'est alors la page « profil » qui s'affiche (resultats.js la remplit).
+  if (id.startsWith("participant-")) {
+    id = "profil";
+  }
+
   // Si l'adresse ne correspond à aucune page (faute de frappe…), on revient à l'accueil
   const page = document.getElementById(id);
   if (!page || !page.classList.contains("page")) {
@@ -22,8 +28,10 @@ function afficherPage() {
   });
 
   // Souligne le lien du menu qui correspond à la page affichée
+  // (un profil fait partie de la rubrique Participants)
+  const rubrique = id === "profil" ? "participants" : id;
   document.querySelectorAll(".menu a").forEach(function (lien) {
-    lien.classList.toggle("actif", lien.getAttribute("href") === "#" + id);
+    lien.classList.toggle("actif", lien.getAttribute("href") === "#" + rubrique);
   });
 
   // Remonte en haut de la page

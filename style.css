@@ -434,8 +434,10 @@ h2 {
   gap: 12px;
 }
 
-/* Rond de l'athlète : ses initiales, en attendant les photos (étape 4) */
+/* Rond de l'athlète : ses initiales, recouvertes par sa photo quand elle existe */
 .avatar {
+  position: relative;
+  overflow: hidden;
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
@@ -448,6 +450,39 @@ h2 {
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--texte-doux);
+}
+
+/* La photo est posée par-dessus les initiales et remplit tout le rond */
+.avatar img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Photo qui n'a pas pu se charger : cachée, les initiales restent visibles */
+.avatar img[hidden] {
+  display: none;
+}
+
+/* Tailles plus grandes : grille des participants et profil */
+.avatar.grand {
+  width: 88px;
+  height: 88px;
+  font-size: 1.4rem;
+}
+
+.avatar.tres-grand {
+  width: 112px;
+  height: 112px;
+  font-size: 1.8rem;
+}
+
+/* Nom cliquable dans les classements : souligné au survol */
+a.athlete:hover .nom {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 /* Détail sous le nom : série, essais, ou coureurs du relais */
@@ -493,4 +528,65 @@ h2 {
   margin: 12px 0 0;
   font-size: 0.8rem;
   color: var(--texte-doux);
+}
+
+/* ==================== PAGE PARTICIPANTS ==================== */
+/* Grille de cartes : autant de colonnes de 140 px minimum que la largeur le permet
+   (2 sur téléphone, plus sur ordinateur) */
+.grille {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+/* Le message de chargement prend toute la largeur de la grille */
+.grille > .vide {
+  grid-column: 1 / -1;
+}
+
+.carte-athlete {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 20px 8px 16px;
+  border: 1px solid var(--bordure);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.carte-athlete:hover {
+  background: var(--fond-doux);
+}
+
+.carte-athlete .nom {
+  margin-top: 6px;
+  font-weight: 600;
+}
+
+.carte-athlete .detail {
+  font-size: 0.85rem;
+  color: var(--texte-doux);
+}
+
+/* ==================== PAGE PROFIL ==================== */
+.retour {
+  display: inline-block;
+  margin: 8px 0 20px;
+  color: var(--texte-doux);
+}
+
+/* Grande photo + dossard + nom */
+.profil-entete {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.profil-entete .etiquette {
+  margin: 0 0 4px;
+}
+
+.profil-entete h2 {
+  margin: 0;
 }

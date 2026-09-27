@@ -214,9 +214,19 @@
     <section class="page" id="participants">
       <p class="etiquette">Participants</p>
       <h2>Les athlètes</h2>
-      <!-- La grille des profils sera remplie plus tard à partir du Google Sheet -->
-      <div class="carte" id="grille-participants">
-        <p class="vide">Les profils des participants apparaîtront ici.</p>
+      <!-- Grille des participants, remplie par resultats.js à partir du Google Sheet.
+           Un clic sur une carte ouvre le profil de l'athlète. -->
+      <div class="grille resultats" id="grille-participants">
+        <p class="vide">Chargement des participants…</p>
+      </div>
+    </section>
+
+    <!-- ---------- PROFIL D'UN ATHLÈTE ---------- -->
+    <!-- Adresse de la forme #participant-12 (12 = dossard). Rempli par resultats.js -->
+    <section class="page" id="profil">
+      <a href="#participants" class="retour">← Tous les participants</a>
+      <div class="resultats" id="contenu-profil">
+        <p class="vide">Chargement du profil…</p>
       </div>
     </section>
 
