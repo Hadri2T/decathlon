@@ -43,8 +43,9 @@ async function lireOnglet(nomOnglet) {
     return ligne.trim().slice(1, -1).split('","');
   });
 
-  // La 1re rangée contient les titres des colonnes : ils servent de noms aux champs
-  const titres = rangees.shift();
+  // La 1re rangée contient les titres des colonnes : ils servent de noms aux champs.
+  // On les met en minuscules : « Surnom » ou « surnom » dans le Sheet, c'est pareil.
+  const titres = rangees.shift().map(titre => titre.trim().toLowerCase());
   const lignes = rangees.map(function (cases) {
     const ligne = {};
     titres.forEach(function (titre, i) {
@@ -123,10 +124,17 @@ function trouverParticipant(dossard) {
   return donnees.participants.find(p => p.dossard === dossard);
 }
 
-// "Camille Martin", ou "Dossard 23" si ce numéro n'est pas dans l'onglet participants
+// Nom affiché partout sur le site : Prénom "Surnom" Nom
+// (ou Prénom Nom quand la case surnom est vide)
+function nomComplet(participant) {
+  const surnom = (participant.surnom || "").trim();
+  return participant["prénom"] + (surnom ? ` "${surnom}" ` : " ") + participant.nom;
+}
+
+// Nom à partir du dossard, ou "Dossard 23" si ce numéro n'est pas dans l'onglet participants
 function nomDuDossard(dossard) {
   const participant = trouverParticipant(dossard);
-  return participant ? participant["prénom"] + " " + participant.nom : "Dossard " + dossard;
+  return participant ? nomComplet(participant) : "Dossard " + dossard;
 }
 
 // Transforme le lien Google Drive collé dans le Sheet
@@ -333,7 +341,7 @@ function afficherParticipants() {
     return `
       <a class="carte-athlete" href="#participant-${encodeURIComponent(p.dossard)}">
         ${rondAthlete(p.dossard, "grand")}
-        <span class="nom">${echapper(p["prénom"] + " " + p.nom)}</span>
+        <span class="nom">${echapper(nomComplet(p))}</span>
         <span class="detail">Dossard ${echapper(p.dossard)}</span>
       </a>`;
   }).join("");
