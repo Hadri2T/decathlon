@@ -377,26 +377,77 @@ h2 {
   color: var(--fond);
 }
 
-/* ==================== TABLEAUX DE CLASSEMENT ==================== */
-/* Une ligne par athlète : rang | nom (+ détail en gris) | performance */
+/* ==================== TABLEAUX DE CLASSEMENT (inspirés du site des JO) ==================== */
+/* Colonnes : rang | athlète (rond + nom + détail en gris) | résultat */
 .tableau {
   width: 100%;
   border-collapse: collapse;
 }
 
+/* Titres des colonnes, en gris */
+.tableau th {
+  padding: 0 4px 10px;
+  font-size: 0.85rem;
+  font-weight: 400;
+  text-align: left;
+  color: var(--texte-doux);
+  border-bottom: 1px solid var(--bordure);
+}
+
+.tableau th:last-child {
+  text-align: right;
+}
+
 .tableau td {
-  padding: 10px 4px;
+  padding: 12px 4px;
   border-bottom: 1px solid var(--bordure);
   vertical-align: middle;
 }
 
-.tableau tr:last-child td {
-  border-bottom: none;
+.tableau .rang {
+  width: 52px;
 }
 
-.tableau .rang {
-  width: 2.5em;
-  font-weight: 700;
+/* Pastilles des 3 premiers et numéros des suivants : même largeur pour rester alignés */
+.medaille,
+.numero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+}
+
+.medaille {
+  border-radius: 50%;
+  font-size: 0.9rem;
+}
+
+.medaille.or     { background: #f3c969; }
+.medaille.argent { background: #e3e3e3; }
+.medaille.bronze { background: #d9b38c; }
+
+/* Rond + nom côte à côte */
+.athlete {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Rond de l'athlète : ses initiales, en attendant les photos (étape 4) */
+.avatar {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--bordure);
+  background: var(--fond-doux);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--texte-doux);
 }
 
 /* Détail sous le nom : série, essais, ou coureurs du relais */
@@ -410,8 +461,31 @@ h2 {
 .tableau .perf {
   text-align: right;
   white-space: nowrap;
-  font-weight: 600;
+  font-size: 1.05rem;
   font-variant-numeric: tabular-nums;   /* chiffres alignés */
+}
+
+/* Sur ordinateur : lignes plus aérées, texte et ronds plus grands */
+@media (min-width: 800px) {
+  .tableau td {
+    padding: 16px 8px;
+  }
+
+  .athlete,
+  .tableau .perf {
+    font-size: 1.2rem;
+  }
+
+  .avatar {
+    width: 52px;
+    height: 52px;
+  }
+
+  .medaille,
+  .numero {
+    width: 42px;
+    height: 42px;
+  }
 }
 
 /* Heure de la dernière mise à jour, sous le tableau */

@@ -108,7 +108,7 @@ function echapper(texte) {
 
 // ---------- 4. CALCUL DES CLASSEMENTS ----------
 // Chaque épreuve est transformée en une liste de lignes de la forme :
-//   { nom: "Camille Martin", genre: "F", detail: "Série 1", perf: 14.72 }
+//   { nom: "Camille Martin", initiales: "CM", genre: "F", detail: "Série 1", perf: 14.72 }
 // ⚠️ Règles provisoires : simple tri par performance, en attendant les règles
 //    des organisateurs (ex. 100 m : vainqueurs de série d'abord ?).
 
@@ -123,12 +123,19 @@ function nomDuDossard(dossard) {
   return participant ? participant["prénom"] + " " + participant.nom : "Dossard " + dossard;
 }
 
+// "CM" pour Camille Martin : affiché dans le rond, en attendant les photos
+function initialesDuDossard(dossard) {
+  const participant = trouverParticipant(dossard);
+  return participant ? participant["prénom"].charAt(0) + participant.nom.charAt(0) : "?";
+}
+
 // Courses (100 m, 800 m) : la performance est le temps
 function lignesCourse(onglet) {
   return donnees[onglet].map(function (ligne) {
     const participant = trouverParticipant(ligne.dossard);
     return {
       nom: nomDuDossard(ligne.dossard),
+      initiales: initialesDuDossard(ligne.dossard),
       genre: participant ? participant.genre : "",
       detail: ligne["série"] ? "Série " + ligne["série"] : "",
       perf: enNombre(ligne.temps),
@@ -144,6 +151,7 @@ function lignesConcours(onglet) {
     const distances = essais.map(enNombre).filter(d => d !== null);   // enlève les X et les cases vides
     return {
       nom: nomDuDossard(ligne.dossard),
+      initiales: initialesDuDossard(ligne.dossard),
       genre: participant ? participant.genre : "",
       detail: essais.map(e => e || "–").join(" · "),                   // ex. « 3,60 · X · 3,55 »
       perf: distances.length > 0 ? Math.max(...distances) : null,
@@ -157,6 +165,7 @@ function lignesRelais() {
     const coureurs = [equipe["coureur 1"], equipe["coureur 2"], equipe["coureur 3"], equipe["coureur 4"]];
     return {
       nom: "Équipe " + equipe["équipe"],
+      initiales: "",   // pas de rond pour une équipe
       genre: "",
       detail: coureurs.filter(d => d !== "").map(nomDuDossard).join(" · "),
       perf: enNombre(equipe.temps),
@@ -187,29 +196,56 @@ function classer(lignes, plusPetitGagne) {
 
 // ---------- 5. AFFICHAGE ----------
 
-// Écrit le tableau d'un classement dans son conteneur
-function afficherTableau(conteneur, lignes, formater) {
+// Colonne Rang : pastille Or / Argent / Bronze pour les 3 premiers, sinon le numéro
+function pastilleRang(rang) {
+  if (rang === 1) return '<span class="medaille or">O</span>';
+  if (rang === 2) return '<span class="medaille argent">A</span>';
+  if (rang === 3) return '<span class="medaille bronze">B</span>';
+  return `<span class="numero">${rang || "–"}</span>`;   // « – » : pas encore de résultat
+}
+
+// Écrit le tableau d'un classement dans son conteneur.
+// titreColonne : « Athlète », ou « Équipe » pour le relais
+function afficherTableau(conteneur, lignes, formater, titreColonne) {
   if (lignes.length === 0) {
     conteneur.innerHTML = '<p class="vide">Pas encore de résultats.</p>';
     return;
   }
 
-  let html = '<table class="tableau">';
+  // Ligne des titres de colonnes
+  let html = `
+    <table class="tableau">
+      <thead>
+        <tr><th>Rang</th><th>${titreColonne}</th><th>Résultat</th></tr>
+      </thead>
+      <tbody>`;
+
+  // Une ligne par athlète (ou par équipe)
   lignes.forEach(function (ligne) {
+    // Rond avec les initiales (les photos le remplaceront à l'étape 4)
+    const rond = ligne.initiales ? `<span class="avatar">${echapper(ligne.initiales)}</span>` : "";
     html += `
-      <tr>
-        <td class="rang">${ligne.rang || "–"}</td>
-        <td>${echapper(ligne.nom)}<span class="detail">${echapper(ligne.detail)}</span></td>
-        <td class="perf">${ligne.perf !== null ? formater(ligne.perf) : "–"}</td>
-      </tr>`;
+        <tr>
+          <td class="rang">${pastilleRang(ligne.rang)}</td>
+          <td>
+            <div class="athlete">
+              ${rond}
+              <div>${echapper(ligne.nom)}<span class="detail">${echapper(ligne.detail)}</span></div>
+            </div>
+          </td>
+          <td class="perf">${ligne.perf !== null ? formater(ligne.perf) : "–"}</td>
+        </tr>`;
   });
-  html += "</table>";
-  html += `<p class="maj">Mis à jour à ${heureMaj}</p>`;
+
+  html += `
+      </tbody>
+    </table>
+    <p class="maj">Mis à jour à ${heureMaj}</p>`;
   conteneur.innerHTML = html;
 }
 
 // Affiche le classement d'une épreuve en tenant compte du filtre Mixte / Femmes / Hommes
-function afficherEpreuve(epreuve, lignes, plusPetitGagne, formater) {
+function afficherEpreuve(epreuve, lignes, plusPetitGagne, formater, titreColonne = "Athlète") {
   const page = document.getElementById("classement-" + epreuve);
 
   // Genre du bouton sélectionné : "" (mixte), "F" ou "H". Le relais n'a pas de filtre.
@@ -219,7 +255,7 @@ function afficherEpreuve(epreuve, lignes, plusPetitGagne, formater) {
     lignes = lignes.filter(ligne => ligne.genre === genre);
   }
 
-  afficherTableau(page.querySelector(".resultats"), classer(lignes, plusPetitGagne), formater);
+  afficherTableau(page.querySelector(".resultats"), classer(lignes, plusPetitGagne), formater, titreColonne);
 }
 
 // Affiche tous les classements (le général attend son barème de points)
@@ -229,7 +265,7 @@ function afficherClassements() {
   afficherEpreuve("800m", lignesCourse("800m"), true, formaterTemps);
   afficherEpreuve("longueur", lignesConcours("longueur"), false, formaterDistance);
   afficherEpreuve("poids", lignesConcours("poids"), false, formaterDistance);
-  afficherEpreuve("relais", lignesRelais(), true, formaterTemps);
+  afficherEpreuve("relais", lignesRelais(), true, formaterTemps, "Équipe");
 }
 
 // Message affiché si le Sheet n'a jamais pu être lu
