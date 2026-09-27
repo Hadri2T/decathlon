@@ -66,18 +66,4 @@ document.addEventListener("click", function (evenement) {
   }
 });
 
-
-// ==================== 3. FILTRES MIXTE / FEMMES / HOMMES ====================
-// Pour l'instant, le clic change seulement le bouton sélectionné.
-// Plus tard, il servira à afficher le classement correspondant.
-
-document.querySelectorAll(".filtres button").forEach(function (bouton) {
-  bouton.addEventListener("click", function () {
-    // On désélectionne les boutons voisins (même groupe de filtres)…
-    bouton.parentElement.querySelectorAll("button").forEach(function (b) {
-      b.classList.remove("actif");
-    });
-    // … et on sélectionne celui qui a été cliqué
-    bouton.classList.add("actif");
-  });
-});
+// Les filtres Mixte / Femmes / Hommes et les classements sont dans resultats.js

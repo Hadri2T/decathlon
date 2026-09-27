@@ -37,6 +37,7 @@ pour obtenir des équipes de niveau homogène.
 - Site statique (HTML / CSS / JavaScript, sans framework), hébergé sur GitHub Pages.
 - Les résultats sont saisis par les organisateurs dans un Google Sheet.
 - Le site lit ce Google Sheet et calcule les classements automatiquement : pas de serveur, pas de login.
+- Les classements se mettent à jour tout seuls toutes les 30 secondes.
 - Les photos des participants sont hébergées sur Google Drive, jamais dans ce dépôt.
 
 ## Voir le site
@@ -47,14 +48,22 @@ Une fois GitHub Pages activé : **https://hadri2t.github.io/decathlon/**
 
 ### En local, sur ordinateur
 
+Le site doit être ouvert via un petit serveur local : ouvert par un simple double-clic sur
+`index.html`, il s'affiche, mais Google refuse de lui envoyer les résultats.
+
 1. Télécharger ou cloner le dépôt.
-2. Double-cliquer sur `index.html` : le site s'ouvre dans le navigateur.
+2. Dans un terminal, depuis le dossier du projet :
+   ```
+   python3 -m http.server 8000 --bind 127.0.0.1
+   ```
+3. Ouvrir **http://localhost:8000** dans le navigateur.
+4. Pour arrêter le serveur : `Ctrl + C` dans le terminal.
 
 ### Simuler l'affichage téléphone sur ordinateur
 
 Le site est conçu d'abord pour le téléphone. Pour le voir comme sur un mobile :
 
-1. Ouvrir `index.html` dans Chrome.
+1. Ouvrir le site dans Chrome (http://localhost:8000).
 2. Ouvrir les outils de développement : `Cmd + Option + I` (Mac) ou `F12` (Windows).
 3. Activer le mode appareil : `Cmd + Shift + M` (Mac) ou `Ctrl + Shift + M` (Windows).
 4. Choisir un modèle de téléphone en haut de l'écran (par exemple iPhone 14).
@@ -65,4 +74,5 @@ Le site est conçu d'abord pour le téléphone. Pour le voir comme sur un mobile
 |---|---|
 | `index.html` | Contenu du site : en-tête, menu et toutes les pages |
 | `style.css` | Apparence : menu téléphone et ordinateur, mise en page |
-| `app.js` | Navigation entre les pages, ouverture du menu, filtres des classements |
+| `app.js` | Navigation entre les pages, ouverture du menu |
+| `resultats.js` | Lecture du Google Sheet, calcul et affichage des classements, filtres Mixte / Femmes / Hommes |

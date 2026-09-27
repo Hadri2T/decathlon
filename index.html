@@ -146,68 +146,68 @@
     </section>
 
     <!-- ---------- CLASSEMENTS (une page par classement) ---------- -->
-    <!-- Les tableaux seront remplis plus tard à partir du Google Sheet.
-         Les boutons Mixte / Femmes / Hommes choisiront quel classement afficher. -->
+    <!-- Les tableaux sont remplis par resultats.js à partir du Google Sheet,
+         dans les blocs « resultats ». Les boutons Mixte / Femmes / Hommes filtrent le tableau. -->
     <section class="page" id="classement-general">
       <p class="etiquette">Classement</p>
       <h2>Général</h2>
       <div class="filtres">
-        <button class="actif">Mixte</button>
-        <button>Femmes</button>
-        <button>Hommes</button>
+        <button class="actif" data-genre="">Mixte</button>
+        <button data-genre="F">Femmes</button>
+        <button data-genre="H">Hommes</button>
       </div>
-      <div class="carte"><p class="vide">Le classement apparaîtra ici.</p></div>
+      <div class="carte"><p class="vide">Le barème de points n'est pas encore choisi : le classement général arrivera plus tard.</p></div>
     </section>
 
     <section class="page" id="classement-100m">
       <p class="etiquette">Classement</p>
       <h2>100 m</h2>
       <div class="filtres">
-        <button class="actif">Mixte</button>
-        <button>Femmes</button>
-        <button>Hommes</button>
+        <button class="actif" data-genre="">Mixte</button>
+        <button data-genre="F">Femmes</button>
+        <button data-genre="H">Hommes</button>
       </div>
-      <div class="carte"><p class="vide">Le classement apparaîtra ici.</p></div>
+      <div class="carte resultats"><p class="vide">Chargement des résultats…</p></div>
     </section>
 
     <section class="page" id="classement-800m">
       <p class="etiquette">Classement</p>
       <h2>800 m</h2>
       <div class="filtres">
-        <button class="actif">Mixte</button>
-        <button>Femmes</button>
-        <button>Hommes</button>
+        <button class="actif" data-genre="">Mixte</button>
+        <button data-genre="F">Femmes</button>
+        <button data-genre="H">Hommes</button>
       </div>
-      <div class="carte"><p class="vide">Le classement apparaîtra ici.</p></div>
+      <div class="carte resultats"><p class="vide">Chargement des résultats…</p></div>
     </section>
 
     <section class="page" id="classement-longueur">
       <p class="etiquette">Classement</p>
       <h2>Saut en longueur</h2>
       <div class="filtres">
-        <button class="actif">Mixte</button>
-        <button>Femmes</button>
-        <button>Hommes</button>
+        <button class="actif" data-genre="">Mixte</button>
+        <button data-genre="F">Femmes</button>
+        <button data-genre="H">Hommes</button>
       </div>
-      <div class="carte"><p class="vide">Le classement apparaîtra ici.</p></div>
+      <div class="carte resultats"><p class="vide">Chargement des résultats…</p></div>
     </section>
 
     <section class="page" id="classement-poids">
       <p class="etiquette">Classement</p>
       <h2>Lancer de poids</h2>
       <div class="filtres">
-        <button class="actif">Mixte</button>
-        <button>Femmes</button>
-        <button>Hommes</button>
+        <button class="actif" data-genre="">Mixte</button>
+        <button data-genre="F">Femmes</button>
+        <button data-genre="H">Hommes</button>
       </div>
-      <div class="carte"><p class="vide">Le classement apparaîtra ici.</p></div>
+      <div class="carte resultats"><p class="vide">Chargement des résultats…</p></div>
     </section>
 
     <!-- Relais : pas de filtre Femmes / Hommes, les équipes sont mixtes -->
     <section class="page" id="classement-relais">
       <p class="etiquette">Classement</p>
       <h2>Relais 4 × 100 m</h2>
-      <div class="carte"><p class="vide">Les équipes et le classement apparaîtront ici.</p></div>
+      <div class="carte resultats"><p class="vide">Chargement des résultats…</p></div>
     </section>
 
     <!-- ---------- PARTICIPANTS ---------- -->
@@ -223,5 +223,6 @@
   </main>
 
   <script src="app.js"></script>
+  <script src="resultats.js"></script>
 </body>
 </html>

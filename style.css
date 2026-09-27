@@ -376,3 +376,47 @@ h2 {
   border-color: var(--texte);
   color: var(--fond);
 }
+
+/* ==================== TABLEAUX DE CLASSEMENT ==================== */
+/* Une ligne par athlète : rang | nom (+ détail en gris) | performance */
+.tableau {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tableau td {
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--bordure);
+  vertical-align: middle;
+}
+
+.tableau tr:last-child td {
+  border-bottom: none;
+}
+
+.tableau .rang {
+  width: 2.5em;
+  font-weight: 700;
+}
+
+/* Détail sous le nom : série, essais, ou coureurs du relais */
+.tableau .detail {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.85rem;
+  color: var(--texte-doux);
+}
+
+.tableau .perf {
+  text-align: right;
+  white-space: nowrap;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;   /* chiffres alignés */
+}
+
+/* Heure de la dernière mise à jour, sous le tableau */
+.maj {
+  margin: 12px 0 0;
+  font-size: 0.8rem;
+  color: var(--texte-doux);
+}
