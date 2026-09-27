@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <!-- Adapte l'affichage à la largeur du téléphone -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Empêche le référencement du site par les moteurs de recherche -->
+  <meta name="robots" content="noindex, nofollow">
+  <title>Décathlon de Pantin</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ==================== EN-TÊTE ==================== -->
+  <!-- Téléphone : bouton ☰ + titre ; le menu est un panneau qui glisse depuis la gauche.
+       Ordinateur : titre à gauche + menu en ligne dans la barre blanche. -->
+  <header class="entete">
+    <button class="bouton-menu" id="ouvrir-menu" aria-label="Ouvrir le menu">☰</button>
+    <a href="#accueil" class="titre-site">Décathlon de Pantin</a>
+
+    <!-- Voile sombre derrière le panneau (téléphone) : un clic dessus ferme le menu -->
+    <div class="voile" id="voile"></div>
+
+    <nav class="menu">
+      <button class="bouton-fermer" id="fermer-menu" aria-label="Fermer le menu">✕</button>
+
+      <a href="#accueil">Accueil</a>
+
+      <!-- <details> s'ouvre et se ferme tout seul au clic sur <summary>, sans JavaScript.
+           name="menu" : un seul sous-menu ouvert à la fois. -->
+      <details name="menu">
+        <summary>Épreuves</summary>
+        <div class="sous-menu">
+          <a href="#epreuve-100m">100 m</a>
+          <a href="#epreuve-800m">800 m</a>
+          <a href="#epreuve-longueur">Saut en longueur</a>
+          <a href="#epreuve-poids">Lancer de poids</a>
+          <a href="#epreuve-relais">Relais 4 × 100 m</a>
+        </div>
+      </details>
+
+      <details name="menu">
+        <summary>Classements</summary>
+        <div class="sous-menu">
+          <a href="#classement-general">Général</a>
+          <a href="#classement-100m">100 m</a>
+          <a href="#classement-800m">800 m</a>
+          <a href="#classement-longueur">Saut en longueur</a>
+          <a href="#classement-poids">Lancer de poids</a>
+          <a href="#classement-relais">Relais 4 × 100 m</a>
+        </div>
+      </details>
+
+      <a href="#participants">Participants</a>
+    </nav>
+  </header>
+
+  <!-- ==================== PAGES ==================== -->
+  <!-- Chaque <section class="page"> est une page du site. Une seule est visible à la fois :
+       celle dont l'id correspond à l'adresse (ex. …/#classement-100m). Voir app.js. -->
+  <main>
+
+    <!-- ---------- ACCUEIL ---------- -->
+    <section class="page" id="accueil">
+      <!-- Bandeau : fond orange provisoire, sera remplacé par une photo -->
+      <div class="bandeau">
+        <h1>Rencontre amicale d'athlétisme</h1>
+        <p>Stade Charles Auray · Pantin</p>
+      </div>
+
+      <p class="etiquette">Infos pratiques</p>
+      <div class="carte">
+        <p><strong>Date :</strong> à confirmer</p>
+        <p><strong>Lieu :</strong> Stade Charles Auray, 19 rue de Candale, Pantin</p>
+        <p><strong>Horaires :</strong> accueil à 9h30, épreuves de 10h à 17h</p>
+      </div>
+
+      <p class="etiquette">Programme de la journée</p>
+      <div class="carte">
+        <ul class="programme">
+          <li><span>09h30</span> Accueil et émargement</li>
+          <li><span>10h00</span> Briefing de sécurité</li>
+          <li><span>10h10</span> Échauffement collectif</li>
+          <li><span>10h35</span> 100 m</li>
+          <li><span>11h15</span> Longueur et poids (1re rotation)</li>
+          <li><span>12h30</span> Pause déjeuner</li>
+          <li><span>13h30</span> Réveil musculaire</li>
+          <li><span>13h45</span> Longueur et poids (2e rotation)</li>
+          <li><span>14h50</span> 800 m</li>
+          <li><span>15h20</span> Relais 4 × 100 m</li>
+          <li><span>15h45</span> Résultats et remise des prix</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ---------- ÉPREUVES (une page par épreuve) ---------- -->
+    <!-- Infos issues du dossier, susceptibles de changer -->
+    <section class="page" id="epreuve-100m">
+      <p class="etiquette">Épreuve</p>
+      <h2>100 m</h2>
+      <div class="carte">
+        <p><strong>Horaire :</strong> 10h35 – 11h15</p>
+        <p><strong>Format :</strong> 4 séries de 5</p>
+        <p>Départ debout, sans starting-blocks.</p>
+      </div>
+    </section>
+
+    <section class="page" id="epreuve-800m">
+      <p class="etiquette">Épreuve</p>
+      <h2>800 m</h2>
+      <div class="carte">
+        <p><strong>Horaire :</strong> 14h50 – 15h20</p>
+        <p><strong>Format :</strong> 2 séries de 10</p>
+        <p>Départ groupé en ligne, sans couloirs.</p>
+      </div>
+    </section>
+
+    <section class="page" id="epreuve-longueur">
+      <p class="etiquette">Épreuve</p>
+      <h2>Saut en longueur</h2>
+      <div class="carte">
+        <p><strong>Horaire :</strong> 11h15 – 12h30 (groupe A) · 13h45 – 14h50 (groupe B)</p>
+        <p><strong>Format :</strong> 3 essais par participant</p>
+        <p>Élan libre et réduit, appel dans une zone tracée à la craie.</p>
+      </div>
+    </section>
+
+    <section class="page" id="epreuve-poids">
+      <p class="etiquette">Épreuve</p>
+      <h2>Lancer de poids</h2>
+      <div class="carte">
+        <p><strong>Horaire :</strong> 11h15 – 12h30 (groupe B) · 13h45 – 14h50 (groupe A)</p>
+        <p><strong>Format :</strong> 3 essais par participant</p>
+        <p>Poids de 4 kg pour tous.</p>
+      </div>
+    </section>
+
+    <section class="page" id="epreuve-relais">
+      <p class="etiquette">Épreuve</p>
+      <h2>Relais 4 × 100 m</h2>
+      <div class="carte">
+        <p><strong>Horaire :</strong> 15h20 – 15h45</p>
+        <p><strong>Format :</strong> 5 équipes de 4, une seule course</p>
+        <p>Équipes composées à partir des résultats des courses. Hors classement général.</p>
+      </div>
+    </section>
+
+    <!-- ---------- CLASSEMENTS (une page par classement) ---------- -->
+    <!-- Les tableaux seront remplis plus tard à partir du Google Sheet.
+         Les boutons Mixte / Femmes / Hommes choisiront quel classement afficher. -->
+    <section class="page" id="classement-general">
+      <p class="etiquette">Classement</p>
+      <h2>Général</h2>
+      <div class="filtres">
+        <button class="actif">Mixte</button>
+        <button>Femmes</button>
+        <button>Hommes</button>
+      </div>
+      <div class="carte"><p class="vide">Le classement apparaîtra ici.</p></div>
+    </section>
+
+    <section class="page" id="classement-100m">
+      <p class="etiquette">Classement</p>
+      <h2>100 m</h2>
+      <div class="filtres">
+        <button class="actif">Mixte</button>
+        <button>Femmes</button>
+        <button>Hommes</button>
+      </div>
+      <div class="carte"><p class="vide">Le classement apparaîtra ici.</p></div>
+    </section>
+
+    <section class="page" id="classement-800m">
+      <p class="etiquette">Classement</p>
+      <h2>800 m</h2>
+      <div class="filtres">
+        <button class="actif">Mixte</button>
+        <button>Femmes</button>
+        <button>Hommes</button>
+      </div>
+      <div class="carte"><p class="vide">Le classement apparaîtra ici.</p></div>
+    </section>
+
+    <section class="page" id="classement-longueur">
+      <p class="etiquette">Classement</p>
+      <h2>Saut en longueur</h2>
+      <div class="filtres">
+        <button class="actif">Mixte</button>
+        <button>Femmes</button>
+        <button>Hommes</button>
+      </div>
+      <div class="carte"><p class="vide">Le classement apparaîtra ici.</p></div>
+    </section>
+
+    <section class="page" id="classement-poids">
+      <p class="etiquette">Classement</p>
+      <h2>Lancer de poids</h2>
+      <div class="filtres">
+        <button class="actif">Mixte</button>
+        <button>Femmes</button>
+        <button>Hommes</button>
+      </div>
+      <div class="carte"><p class="vide">Le classement apparaîtra ici.</p></div>
+    </section>
+
+    <!-- Relais : pas de filtre Femmes / Hommes, les équipes sont mixtes -->
+    <section class="page" id="classement-relais">
+      <p class="etiquette">Classement</p>
+      <h2>Relais 4 × 100 m</h2>
+      <div class="carte"><p class="vide">Les équipes et le classement apparaîtront ici.</p></div>
+    </section>
+
+    <!-- ---------- PARTICIPANTS ---------- -->
+    <section class="page" id="participants">
+      <p class="etiquette">Participants</p>
+      <h2>Les athlètes</h2>
+      <!-- La grille des profils sera remplie plus tard à partir du Google Sheet -->
+      <div class="carte" id="grille-participants">
+        <p class="vide">Les profils des participants apparaîtront ici.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
